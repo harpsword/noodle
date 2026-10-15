@@ -1,6 +1,7 @@
 package monitor
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -43,9 +44,13 @@ func requireCachePlatform(t *testing.T) {
 		t.Skip("platform uses uncached correctness fallback")
 	}
 }
-func countCanonicalOpens(r *CanonicalClaimsReader) *int {
+func countCanonicalScans(r *CanonicalClaimsReader) *int {
 	count := new(int)
-	r.openCanonical = func(path string) (*os.File, error) { *count++; return os.Open(path) }
+	scan := r.scanCanonical
+	r.scanCanonical = func(input io.Reader, sessionID string) (SessionClaims, error) {
+		*count++
+		return scan(input, sessionID)
+	}
 	return count
 }
 
@@ -53,7 +58,7 @@ func TestCanonicalStableGenerationDoesNotReadAgain(t *testing.T) {
 	requireCachePlatform(t)
 	root, path := cacheFixture(t, cacheAction+cacheResult)
 	r := NewCanonicalClaimsReader(root)
-	reads := countCanonicalOpens(r)
+	reads := countCanonicalScans(r)
 	first := cacheRead(t, r)
 	for range 4 {
 		if got := cacheRead(t, r); !reflect.DeepEqual(got, first) {
@@ -61,7 +66,7 @@ func TestCanonicalStableGenerationDoesNotReadAgain(t *testing.T) {
 		}
 	}
 	if *reads != 1 {
-		t.Fatalf("canonical opened %d times for unchanged source, want 1", *reads)
+		t.Fatalf("canonical scanned %d times for unchanged source, want 1", *reads)
 	}
 	cacheWrite(t, filepath.Join(filepath.Dir(path), "spawn.json"), `{"model":"corrected","skill":"schedule","runtime":"sprites"}`)
 	got := cacheRead(t, r)
@@ -144,25 +149,43 @@ func TestCanonicalParseFailureRetries(t *testing.T) {
 	}
 }
 
-func TestCanonicalReplacementDuringReadIsNotCached(t *testing.T) {
-	root, path := cacheFixture(t, cacheAction)
-	r := NewCanonicalClaimsReader(root)
-	r.openCanonical = func(name string) (*os.File, error) {
-		f, err := os.Open(name)
-		if err != nil {
-			return nil, err
-		}
-		cacheWrite(t, path+".next", cacheResult)
-		if err := os.Rename(path+".next", path); err != nil {
-			f.Close()
-			t.Fatal(err)
-		}
-		return f, nil
-	}
-	cacheRead(t, r)
-	r.openCanonical = os.Open
-	if got := cacheRead(t, r); got.TotalCostUSD != 1.5 || got.LastAction != "" {
-		t.Fatalf("reused replaced generation: %+v", got)
+func TestCanonicalMutationDuringReadIsNotCached(t *testing.T) {
+	for _, mutation := range []string{"append", "truncate", "replace"} {
+		t.Run(mutation, func(t *testing.T) {
+			root, path := cacheFixture(t, cacheAction)
+			r := NewCanonicalClaimsReader(root)
+			scan := r.scanCanonical
+			r.scanCanonical = func(input io.Reader, id string) (SessionClaims, error) {
+				claims, err := scan(input, id)
+				// The descriptor's pre-scan stat has already been captured. Mutate before
+				// post-scan validation so unsafe publication is deterministic, without sleeps.
+				switch mutation {
+				case "append":
+					cacheWrite(t, path, cacheAction+cacheResult)
+				case "truncate":
+					cacheWrite(t, path, "")
+				case "replace":
+					cacheWrite(t, path+".next", cacheResult)
+					if err := os.Rename(path+".next", path); err != nil {
+						t.Fatal(err)
+					}
+				}
+				return claims, err
+			}
+			cacheRead(t, r)
+			if _, ok := r.cache[cacheSession]; ok {
+				t.Fatal("unstable scan published a cache entry")
+			}
+			r.scanCanonical = scan
+			got := cacheRead(t, r)
+			if mutation == "truncate" {
+				if got.HasEvents {
+					t.Fatalf("truncated log retained events: %+v", got)
+				}
+			} else if got.TotalCostUSD != 1.5 {
+				t.Fatalf("did not refresh mutated log: %+v", got)
+			}
+		})
 	}
 }
 

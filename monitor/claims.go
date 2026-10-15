@@ -4,9 +4,10 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"os"
+	"io"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/poteto/noodle/internal/jsonx"
 	"github.com/poteto/noodle/parse"
@@ -22,17 +23,21 @@ type spawnPayload struct {
 const defaultMaxEventLineBytes = 64 << 20
 
 type CanonicalClaimsReader struct {
+	mu            sync.Mutex
+	cache         map[string]canonicalCacheEntry
 	runtimeDir    string
 	maxLineBytes  int
-	openCanonical func(string) (*os.File, error)
+	scanCanonical func(io.Reader, string) (SessionClaims, error)
 }
 
 func NewCanonicalClaimsReader(runtimeDir string) *CanonicalClaimsReader {
-	return &CanonicalClaimsReader{
-		runtimeDir:    strings.TrimSpace(runtimeDir),
-		maxLineBytes:  defaultMaxEventLineBytes,
-		openCanonical: os.Open,
+	reader := &CanonicalClaimsReader{
+		cache:        make(map[string]canonicalCacheEntry),
+		runtimeDir:   strings.TrimSpace(runtimeDir),
+		maxLineBytes: defaultMaxEventLineBytes,
 	}
+	reader.scanCanonical = reader.parseCanonical
+	return reader
 }
 
 func (r *CanonicalClaimsReader) ReadSession(sessionID string) (SessionClaims, error) {
@@ -44,16 +49,31 @@ func (r *CanonicalClaimsReader) ReadSession(sessionID string) (SessionClaims, er
 		return SessionClaims{}, fmt.Errorf("runtime directory is required")
 	}
 
-	path := filepath.Join(r.runtimeDir, "sessions", sessionID, "canonical.ndjson")
-	file, err := r.openCanonical(path)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return SessionClaims{SessionID: sessionID}, nil
-		}
-		return SessionClaims{}, fmt.Errorf("open canonical events: %w", err)
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	claims, exists, err := r.readCanonical(sessionID)
+	if err != nil || !exists {
+		return claims, err
 	}
-	defer file.Close()
+	if metadata, err := r.readSpawnMetadata(sessionID); err == nil {
+		if claims.Skill == "" {
+			claims.Skill = metadata.Skill
+		}
+		if claims.Runtime == "" {
+			claims.Runtime = metadata.Runtime
+		}
+		if claims.Provider == "" {
+			claims.Provider = metadata.Provider
+		}
+		if claims.Model == "" {
+			claims.Model = metadata.Model
+		}
+	}
 
+	return claims, nil
+}
+
+func (r *CanonicalClaimsReader) parseCanonical(file io.Reader, sessionID string) (SessionClaims, error) {
 	claims := SessionClaims{SessionID: sessionID}
 	scanner := bufio.NewScanner(file)
 	scanner.Buffer(make([]byte, 0, 64*1024), r.maxLineBytes)
@@ -96,21 +116,6 @@ func (r *CanonicalClaimsReader) ReadSession(sessionID string) (SessionClaims, er
 	if err := scanner.Err(); err != nil {
 		return SessionClaims{}, fmt.Errorf("read canonical events: %w", err)
 	}
-	if metadata, err := r.readSpawnMetadata(sessionID); err == nil {
-		if claims.Skill == "" {
-			claims.Skill = metadata.Skill
-		}
-		if claims.Runtime == "" {
-			claims.Runtime = metadata.Runtime
-		}
-		if claims.Provider == "" {
-			claims.Provider = metadata.Provider
-		}
-		if claims.Model == "" {
-			claims.Model = metadata.Model
-		}
-	}
-
 	return claims, nil
 }
 

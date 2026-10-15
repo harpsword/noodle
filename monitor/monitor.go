@@ -20,6 +20,7 @@ type Monitor struct {
 	claims          ClaimsReader
 	tickets         TicketMaterializer
 	now             func() time.Time
+	runMu           sync.Mutex
 	mu              sync.Mutex
 	lastRunFinished time.Time
 }
@@ -40,6 +41,8 @@ func NewMonitor(runtimeDir string) *Monitor {
 }
 
 func (m *Monitor) RunOnce(ctx context.Context) ([]SessionMeta, error) {
+	m.runMu.Lock()
+	defer m.runMu.Unlock()
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -52,6 +55,9 @@ func (m *Monitor) RunOnce(ctx context.Context) ([]SessionMeta, error) {
 		return nil, err
 	}
 
+	if reader, ok := m.claims.(*CanonicalClaimsReader); ok {
+		reader.pruneCache(sessionIDs)
+	}
 	metas := make([]SessionMeta, 0, len(sessionIDs))
 	now := m.now().UTC()
 	for _, sessionID := range sessionIDs {
@@ -81,7 +87,14 @@ func (m *Monitor) RunOnce(ctx context.Context) ([]SessionMeta, error) {
 				meta.Health = HealthYellow
 			}
 		}
-		if err := writeSessionMeta(sessionMetaPath(m.runtimeDir, sessionID), meta); err != nil {
+		comparable := meta
+		comparable.UpdatedAt = previous.UpdatedAt
+		if comparable.LastActivity.Equal(previous.LastActivity) {
+			comparable.LastActivity = previous.LastActivity
+		}
+		if comparable == previous {
+			meta = previous
+		} else if err := writeSessionMeta(sessionMetaPath(m.runtimeDir, sessionID), meta); err != nil {
 			return nil, fmt.Errorf("write meta for %s: %w", sessionID, err)
 		}
 		metas = append(metas, meta)
