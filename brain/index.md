@@ -44,6 +44,7 @@
 - [[codebase/schedule-bootstrap-hot-loop]]
 - [[codebase/schedule-order-normalized-away-when-skill-missing]]
 - [[codebase/scheduler-active-order-amendments]]
+- [[codebase/scheduler-self-retrigger-after-empty-orders]]
 - [[codebase/scheduler-steer-alias-prefers-live-session]]
 - [[codebase/session-failure-classification-crash-only]]
 - [[codebase/sprites-session-outcome-resolution-ordering]]
@@ -61,6 +62,9 @@
 
 ## Backlog
 - [[todos]]
+
+## Audits
+- [[audits/2026-10-15-runtime-redundant-work]]
 
 ## Plans
 - [[plans/index]]
