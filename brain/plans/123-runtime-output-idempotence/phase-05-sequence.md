@@ -13,7 +13,7 @@ Keep unchanged applied command sequence stable.
 lastAppliedSeq and its decimal-plus-newline on-disk representation.
 
 ## Routing and principles
-Implementation: Codex, current configured model; independent review: Claude CLI. Apply [[principles/fix-root-causes]], [[principles/make-operations-idempotent]] and [[principles/prove-it-works]].
+Implementation: Codex, current configured model; independent review: separate current-environment agents, as explicitly requested by the user. Apply [[principles/fix-root-causes]], [[principles/make-operations-idempotent]] and [[principles/prove-it-works]].
 
 ## Verification
 Static: gofmt, scoped tests and vet; full pnpm check at integrated verification. Runtime: Preserve zero-seq no-file behavior, stable nonzero file identity, advance persisted seq on new commands, restore deleted output, and keep replay suppression/flush error ordering tests green.

@@ -13,7 +13,7 @@ Introduce opt-in content-idempotent atomic output.
 Disk bytes and file identity; no long-lived cache.
 
 ## Routing and principles
-Implementation: Codex, current configured model; independent review: Claude CLI. Apply [[principles/fix-root-causes]], [[principles/make-operations-idempotent]] and [[principles/prove-it-works]].
+Implementation: Codex, current configured model; independent review: separate current-environment agents, as explicitly requested by the user. Apply [[principles/fix-root-causes]], [[principles/make-operations-idempotent]] and [[principles/prove-it-works]].
 
 ## Verification
 Static: gofmt, scoped tests and vet; full pnpm check at integrated verification. Runtime: Cover equal bytes preserving identity/mtime, changed content atomically visible, missing/deleted/corrupt output repair, and replacement errors/temp cleanup. Set old timestamps instead of sleeping. Document unchanged-mode behavior and no new fsync promise.

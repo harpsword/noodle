@@ -11,7 +11,7 @@ Task 123 follows [[audits/2026-10-15-runtime-redundant-work]] R1/R4: a failed-on
 
 ## Scope and intended behavior
 
-Remove backend-owned orders.json from runtime wake inputs. Keep orders-next.json and control.ndjson wakeups and the existing one-second ticker. Completions and merge results currently progress through that ticker rather than an explicit wake signal; preserve that bound instead of silently promising instantaneous wakeups.
+Remove backend-owned orders.json from runtime wake inputs. Keep orders-next.json and control.ndjson wakeups and the existing one-second ticker. Completions and merge results currently progress through that ticker rather than an explicit wake signal; preserve that polling mechanism instead of promising instantaneous wakeups or a strict one-second end-to-end bound (cycle work adds latency).
 
 Make only orders.json, state.json, pending-review.json and nonzero last-applied-seq writes content-idempotent. Equal bytes leave inode, mtime and mode untouched. Changed/missing/corrupted outputs are atomically replaced with the existing 0644 behavior. Preserve serialization, flush order, error propagation and command replay barriers.
 
@@ -19,7 +19,7 @@ Out of scope: historical metadata/tickets scans, adapter cadence, repeated proje
 
 ## Design and alternatives
 
-Following [[principles/fix-root-causes]] and [[principles/subtract-before-you-add]], remove the incorrect output-to-input edge first. From first principles, backend projections are views, while commands and orders-next are inputs. Startup still reads legacy orders when canonical recovery needs them; running cycles already use in-memory/canonical state.
+Following [[principles/fix-root-causes]] and [[principles/subtract-before-you-add]], remove the incorrect output-to-input edge first. From first principles, backend projections are views, while commands and orders-next are inputs. Startup still loads the legacy orders mirror and retains canonical bootstrap/recovery behavior; running cycles use cached orders and canonical state.
 
 Following [[principles/make-operations-idempotent]], add an opt-in filex.WriteFileAtomicIfChanged helper and use it only at the four selected output boundaries. Read actual disk bytes and delegate to existing WriteFileAtomic on difference or read failure. A failed read is not a new error condition: the previous writer could replace an unreadable file in a writable parent. Actual replacement failures still propagate. No cache: restart, deletion and external corruption repair remain natural. Equal bytes intentionally do not normalize externally changed mode bits; avoiding unchanged metadata operations is part of this contract.
 
@@ -29,7 +29,7 @@ Alternatives: (1) debounce or slower polling only masks feedback and delays real
 
 ## Applicable skills
 
-plan, adversarial-review, debugging, go-best-practices, testing, execute, worktree, commit, quality, reflect. Planning exploration is delegated; independent review uses Claude CLI (opposite provider), not Codex subagents. User explicitly authorized plan → separate review → implementation → CPU verification in this request; no additional human pause is needed between those stages.
+plan, adversarial-review, debugging, go-best-practices, testing, execute, worktree, commit, quality, reflect. Planning exploration is delegated. The user explicitly declined external CLI transmission and selected independent reviewers within the current environment. This overrides the skill's opposite-provider CLI requirement: separate local agents review Skeptic, Architect and Minimalist lenses; reports must disclose the lack of cross-provider independence. No plan/source materials were sent through Claude CLI. User explicitly authorized plan → separate review → implementation → CPU verification in this request; no additional human pause is needed between those stages.
 
 ## Phases
 
