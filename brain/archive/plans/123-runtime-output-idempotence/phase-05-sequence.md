@@ -1,6 +1,6 @@
 # Phase 5: Keep unchanged applied command sequence stable
 
-Back to [[plans/123-runtime-output-idempotence/overview]]
+Back to [[archive/plans/123-runtime-output-idempotence/overview]]
 
 ## Goal
 Keep unchanged applied command sequence stable.

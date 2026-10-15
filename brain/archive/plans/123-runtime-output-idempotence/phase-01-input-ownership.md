@@ -1,6 +1,6 @@
 # Phase 1: Remove output-triggered runtime cycles
 
-Back to [[plans/123-runtime-output-idempotence/overview]]
+Back to [[archive/plans/123-runtime-output-idempotence/overview]]
 
 ## Goal
 Remove output-triggered runtime cycles.

@@ -18,4 +18,4 @@
 - [ ] [[plans/115-canonical-state-convergence/overview]]
 - [x] [[archive/plans/95-orders-json-ownership/overview]]
 - [ ] [[plans/119-brainmaxxing-autoresearch/overview]]
-- [ ] [[plans/123-runtime-output-idempotence/overview]]
+- [x] [[archive/plans/123-runtime-output-idempotence/overview]]

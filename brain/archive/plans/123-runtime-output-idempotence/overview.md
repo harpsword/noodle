@@ -1,7 +1,7 @@
 ---
 id: 123
 created: 2026-10-15
-status: active
+status: completed
 ---
 # Stop runtime output feedback and redundant writes
 
@@ -33,12 +33,12 @@ plan, adversarial-review, debugging, go-best-practices, testing, execute, worktr
 
 ## Phases
 
-- [ ] [[plans/123-runtime-output-idempotence/phase-01-input-ownership]]
-- [ ] [[plans/123-runtime-output-idempotence/phase-02-idempotent-writer]]
-- [ ] [[plans/123-runtime-output-idempotence/phase-03-projection]]
-- [ ] [[plans/123-runtime-output-idempotence/phase-04-pending-review]]
-- [ ] [[plans/123-runtime-output-idempotence/phase-05-sequence]]
-- [ ] [[plans/123-runtime-output-idempotence/phase-06-verification]]
+- [x] [[archive/plans/123-runtime-output-idempotence/phase-01-input-ownership]]
+- [x] [[archive/plans/123-runtime-output-idempotence/phase-02-idempotent-writer]]
+- [x] [[archive/plans/123-runtime-output-idempotence/phase-03-projection]]
+- [x] [[archive/plans/123-runtime-output-idempotence/phase-04-pending-review]]
+- [x] [[archive/plans/123-runtime-output-idempotence/phase-05-sequence]]
+- [x] [[archive/plans/123-runtime-output-idempotence/phase-06-verification]]
 
 Phases 2–5 use one helper contract and execute sequentially. Regression tests through existing output entry points are committed together before the production fix, so they compile on the red baseline. New-helper unit tests are added with its implementation; no production scaffolding is introduced merely to make a test compile. No unrelated task implementation is included.
 
@@ -47,3 +47,9 @@ Phases 2–5 use one helper contract and execute sequentially. Regression tests 
 Run focused regression tests with -race for filex/projection/loop, including sequence replay, flush barriers, orders-next crash safety and real fsnotify. Run pnpm check, UI unit suite and pnpm test:smoke with the repo-compatible Node/pnpm/Git toolchain. Build with pnpm build, not bare go build. Independent code quality review follows implementation.
 
 Capture a 15-second CPU-time delta and file-change baseline from the currently running failed-only playground process. After checks, install a version-labelled build at the existing local noodle target, gracefully restart only that verified process (no active provider work), and repeat the same measurement with the same failed order/history/config. Verify PID executable, version, loop state and unchanged order payload. If workload changes, report the comparison limit and use a controlled equivalent fixture. Retain old binary for rollback until verification succeeds. In addition to lower CPU, the four target outputs must have zero changes after startup settles. Remaining metadata/tickets/adapter work is expected and must be reported separately rather than widening scope.
+
+## Completion
+
+Implemented in `3c51ca9` after independent plan and implementation reviews. Same failed-only live workload: average CPU 51.2% → 8.93%, target output rewrites 97 each → 0 each in 15 seconds. See [[archive/plans/123-runtime-output-idempotence/verification]] and [[archive/plans/123-runtime-output-idempotence/quality-review]].
+
+Tests were consolidated into `projection_idle_test.go` and `runtime_output_idle_test.go` rather than introducing a separate pending-review test file. This is test organization only; the reviewed production scope remains unchanged.

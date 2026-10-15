@@ -1,13 +1,13 @@
 # Phase 4: Keep unchanged pending-review output stable
 
-Back to [[plans/123-runtime-output-idempotence/overview]]
+Back to [[archive/plans/123-runtime-output-idempotence/overview]]
 
 ## Goal
 Keep unchanged pending-review output stable.
 
 ## Changes
 - loop/pending_review.go — opt in at the persistence boundary.
-- loop/pending_review_idle_test.go — test stable and changed review snapshots.
+- loop/runtime_output_idle_test.go — test stable and changed review snapshots.
 
 ## Data structures
 canonical PendingReview map and sorted pendingReviewSnapshot.

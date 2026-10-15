@@ -1,6 +1,6 @@
 # Phase 2: Introduce opt-in content-idempotent atomic output
 
-Back to [[plans/123-runtime-output-idempotence/overview]]
+Back to [[archive/plans/123-runtime-output-idempotence/overview]]
 
 ## Goal
 Introduce opt-in content-idempotent atomic output.

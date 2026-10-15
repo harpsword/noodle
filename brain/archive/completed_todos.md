@@ -1,5 +1,7 @@
 # Completed Todos
 
+123. [x] Stop runtime output feedback and redundant writes — implemented in 3c51ca9 after independent plan/code review; same failed-only live workload CPU 51.2% to 8.93%, stable orders/state/review/seq writes 97 each to 0 each per 15s. Real inputs, completion/merge polling and replay tests pass. #bug [[archive/plans/123-runtime-output-idempotence/overview]]
+
 122. [x] Fix idle CPU caused by empty control queue rewrites — skip truncation under the existing lock when control.ndjson is empty. Regression tests reproduce the filesystem feedback and verify real commands are acknowledged and drained. Isolated CPU comparison: 102.1% to 3.0%; no empty queue rewrites. #bug [[codebase/empty-control-queue-idle-cpu]]
 
 95. [x] ~~Backend should exclusively own `orders.json` — prevent agents from writing to it directly. The loop promotes `orders-next.json` into `orders.json`, and this should be enforced at the backend level (e.g. file permissions, validation gate) rather than relying on skill instructions. [[archive/plans/95-orders-json-ownership/overview]]~~ — subsumed into #115 canonical state convergence rather than executed as a separate plan.

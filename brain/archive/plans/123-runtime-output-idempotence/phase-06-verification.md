@@ -1,6 +1,6 @@
 # Phase 6: Verify integrated behavior, review code and measure CPU
 
-Back to [[plans/123-runtime-output-idempotence/overview]]
+Back to [[archive/plans/123-runtime-output-idempotence/overview]]
 
 ## Goal
 Verify integrated behavior, review code and measure CPU.

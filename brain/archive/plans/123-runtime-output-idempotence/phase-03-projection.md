@@ -1,13 +1,13 @@
 # Phase 3: Keep unchanged projection files stable
 
-Back to [[plans/123-runtime-output-idempotence/overview]]
+Back to [[archive/plans/123-runtime-output-idempotence/overview]]
 
 ## Goal
 Keep unchanged projection files stable.
 
 ## Changes
 - internal/projection/projection.go — route orders/state output through opt-in writer.
-- internal/projection/projection_test.go — prove per-file stability and repair.
+- internal/projection/projection_idle_test.go — prove per-file stability and repair.
 
 ## Data structures
 projection.Bundle and its existing deterministic serialized outputs.
