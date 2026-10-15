@@ -19,4 +19,4 @@
 - [x] [[archive/plans/95-orders-json-ownership/overview]]
 - [ ] [[plans/119-brainmaxxing-autoresearch/overview]]
 - [x] [[archive/plans/123-runtime-output-idempotence/overview]]
-- [ ] [[plans/124-session-metadata-refresh/overview]]
+- [x] [[archive/plans/124-session-metadata-refresh/overview]]

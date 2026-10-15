@@ -1,5 +1,7 @@
 # Completed Todos
 
+124. [x] Refresh session metadata only when source state changes — implemented in b3c1f5c after independent local plan/code review. Canonical generation cache preserves liveness and source corrections; same live workload CPU 9.0% → 2.2%, historical metadata changes 870 → 0 per 15s. #bug [[archive/plans/124-session-metadata-refresh/overview]]
+
 123. [x] Stop runtime output feedback and redundant writes — implemented in 3c51ca9 after independent plan/code review; same failed-only live workload CPU 51.2% to 8.93%, stable orders/state/review/seq writes 97 each to 0 each per 15s. Real inputs, completion/merge polling and replay tests pass. #bug [[archive/plans/123-runtime-output-idempotence/overview]]
 
 122. [x] Fix idle CPU caused by empty control queue rewrites — skip truncation under the existing lock when control.ndjson is empty. Regression tests reproduce the filesystem feedback and verify real commands are acknowledged and drained. Isolated CPU comparison: 102.1% to 3.0%; no empty queue rewrites. #bug [[codebase/empty-control-queue-idle-cpu]]

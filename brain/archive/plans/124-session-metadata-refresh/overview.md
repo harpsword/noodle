@@ -1,7 +1,7 @@
 ---
 id: 124
 created: 2026-10-15
-status: active
+status: completed
 ---
 # Refresh session metadata only when source state changes
 
@@ -33,16 +33,20 @@ Repo plan, worktree, debugging, go-best-practices, testing, execute, commit and 
 
 ## Phases
 
-- [ ] [[plans/124-session-metadata-refresh/phase-01-regressions]]
-- [ ] [[plans/124-session-metadata-refresh/phase-02-file-generation]]
-- [ ] [[plans/124-session-metadata-refresh/phase-03-canonical-cache]]
-- [ ] [[plans/124-session-metadata-refresh/phase-04-terminal-time]]
-- [ ] [[plans/124-session-metadata-refresh/phase-05-metadata-persistence]]
-- [ ] [[plans/124-session-metadata-refresh/phase-06-liveness-verification]]
-- [ ] [[plans/124-session-metadata-refresh/phase-07-runtime-verification]]
+- [x] [[archive/plans/124-session-metadata-refresh/phase-01-regressions]]
+- [x] [[archive/plans/124-session-metadata-refresh/phase-02-file-generation]]
+- [x] [[archive/plans/124-session-metadata-refresh/phase-03-canonical-cache]]
+- [x] [[archive/plans/124-session-metadata-refresh/phase-04-terminal-time]]
+- [x] [[archive/plans/124-session-metadata-refresh/phase-05-metadata-persistence]]
+- [x] [[archive/plans/124-session-metadata-refresh/phase-06-liveness-verification]]
+- [x] [[archive/plans/124-session-metadata-refresh/phase-07-runtime-verification]]
 
 ## Verification
 
 Commit red regressions before production changes. Assert actual canonical scan counts and unchanged meta bytes/inode/mtime, rather than merely equal JSON. Include deterministic replacement during scanning and a non-UTC timestamp round-trip. Verify append/truncate/replacement/in-place corrections, missing/create, parse-error recovery, fresh spawn, external metadata, cold restart and active liveness without new logs. Preserve scheduler terminal-repair exemption and loop deadline tests. Run race tests for monitor/loop, pnpm check, and local TestSmokeStartOnce e2e only; model-backed smoke is excluded by the no-external-review/data boundary. Cross-compile monitor tests for Linux and Windows.
 
 After independent code review and merge, build with pnpm build and source-identified local version, atomically replace the authorized local executable and gracefully restart only the existing idle playground process. Measure cumulative process CPU and all metadata file generations over the same 15-second window with unchanged session/order/mode state. Record residual tickets churn separately; do not expand into #125. Archive the plan and complete the backlog only after this evidence is recorded, per [[principles/prove-it-works]].
+
+## Outcome
+
+Implemented in b3c1f5c after independent local plan/code review. Live CPU 9.0% → 2.2%; 58 historical metadata files: 870 → 0 observed changes per 15 seconds. See [[archive/plans/124-session-metadata-refresh/verification]].

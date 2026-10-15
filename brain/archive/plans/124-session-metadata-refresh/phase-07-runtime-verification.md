@@ -1,6 +1,6 @@
 # Phase 7: runtime verification
 
-Back to [[plans/124-session-metadata-refresh/overview]]
+Back to [[archive/plans/124-session-metadata-refresh/overview]]
 
 ## Goal
 

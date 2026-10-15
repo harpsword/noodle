@@ -24,3 +24,5 @@
 - [x] [[archive/plans/74-vestigial-queue-cleanup/overview]]
 - [x] [[archive/plans/95-orders-json-ownership/overview]]
 - [x] [[archive/plans/123-runtime-output-idempotence/overview]]
+
+- [[archive/plans/124-session-metadata-refresh/overview]]

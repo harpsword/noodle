@@ -1,6 +1,6 @@
 # Phase 6: liveness verification
 
-Back to [[plans/124-session-metadata-refresh/overview]]
+Back to [[archive/plans/124-session-metadata-refresh/overview]]
 
 ## Goal
 

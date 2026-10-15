@@ -2,7 +2,9 @@
 
 ## 后续修复状态
 
-2026-10-15：123（R1/R4）已完成，提交 `3c51ca9`。相同 failed-only 现场 CPU 51.2% → 8.93%；orders/state/pending-review/seq 每份文件 15 秒内的重复写入 97 → 0。方案、独立评审与验证已归档：[[archive/plans/123-runtime-output-idempotence/overview]]。下文保留原始调查基线；其余待办仍未实现。
+2026-10-16：124（R2）已完成，提交 `b3c1f5c`。同状态现场 CPU 9.0% → 2.2%；58 份历史 metadata 在 15 秒内的改写 870 → 0。存活检查、source 修正与重启恢复通过验证；tickets 仍每秒写入，保留给 125。方案、独立评审与验证：[[archive/plans/124-session-metadata-refresh/overview]]。
+
+2026-10-15：123（R1/R4）已完成，提交 `3c51ca9`。相同 failed-only 现场 CPU 51.2% → 8.93%；orders/state/pending-review/seq 每份文件 15 秒内的重复写入 97 → 0。方案、独立评审与验证已归档：[[archive/plans/123-runtime-output-idempotence/overview]]。下文保留原始调查基线。
 
 调查基线为 `c52a319fa734fdf70e3baa7a7845962272a3b487`。事实来源为本地生产源码、当前进程只读观察及临时隔离实验。各项独立 CPU 占比未测量；下文明确区分实测、静态可达和条件性风险。
 
