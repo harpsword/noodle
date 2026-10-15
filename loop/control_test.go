@@ -914,3 +914,54 @@ func TestFailedOrderRequiresRequeueBeforeDispatch(t *testing.T) {
 		t.Fatalf("candidates = %d, want 1 after requeue", len(candidates))
 	}
 }
+
+func TestAppliedSequenceOutputSkipsUnchangedAndRepairs(t *testing.T) {
+	l := newOutputTestLoop(t, "failed")
+	path := l.lastAppliedSeqPath()
+	if err := l.writeLastAppliedSeq(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		t.Fatalf("zero sequence created file: %v", err)
+	}
+	l.cmds.lastAppliedSeq = 7
+	if err := l.writeLastAppliedSeq(); err != nil {
+		t.Fatal(err)
+	}
+	stamp := time.Unix(1_000_000_000, 0)
+	if err := os.Chtimes(path, stamp, stamp); err != nil {
+		t.Fatal(err)
+	}
+	before, err := os.Stat(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := l.writeLastAppliedSeq(); err != nil {
+		t.Fatal(err)
+	}
+	after, err := os.Stat(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !os.SameFile(before, after) || !after.ModTime().Equal(stamp) {
+		t.Error("same sequence rewritten")
+	}
+	l.cmds.lastAppliedSeq = 8
+	if err := l.writeLastAppliedSeq(); err != nil {
+		t.Fatal(err)
+	}
+	data, err := os.ReadFile(path)
+	if err != nil || string(data) != "8\n" {
+		t.Fatalf("new sequence not persisted: %q %v", data, err)
+	}
+	if err := os.Remove(path); err != nil {
+		t.Fatal(err)
+	}
+	if err := l.writeLastAppliedSeq(); err != nil {
+		t.Fatal(err)
+	}
+	data, err = os.ReadFile(path)
+	if err != nil || string(data) != "8\n" {
+		t.Fatalf("sequence not repaired: %q %v", data, err)
+	}
+}

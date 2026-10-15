@@ -17,7 +17,7 @@ func TestShouldTriggerRuntimeCycle(t *testing.T) {
 		path string
 		want bool
 	}{
-		{path: "/tmp/orders.json", want: true},
+		{path: "/tmp/orders.json", want: false},
 		{path: "/tmp/orders-next.json", want: true},
 		{path: "/tmp/control.ndjson", want: true},
 		{path: "/tmp/status.json", want: false},
@@ -52,7 +52,7 @@ func TestForwardRuntimeWatcherCoalescesRelevantEvents(t *testing.T) {
 	case <-time.After(50 * time.Millisecond):
 	}
 
-	events <- fsnotify.Event{Name: "/tmp/orders.json"}
+	events <- fsnotify.Event{Name: "/tmp/orders-next.json"}
 	waitForTriggerBuffer(t, cycleTrigger, 1)
 
 	events <- fsnotify.Event{Name: "/tmp/control.ndjson"}
