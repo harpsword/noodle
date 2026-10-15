@@ -22,14 +22,16 @@ type spawnPayload struct {
 const defaultMaxEventLineBytes = 64 << 20
 
 type CanonicalClaimsReader struct {
-	runtimeDir   string
-	maxLineBytes int
+	runtimeDir    string
+	maxLineBytes  int
+	openCanonical func(string) (*os.File, error)
 }
 
 func NewCanonicalClaimsReader(runtimeDir string) *CanonicalClaimsReader {
 	return &CanonicalClaimsReader{
-		runtimeDir:   strings.TrimSpace(runtimeDir),
-		maxLineBytes: defaultMaxEventLineBytes,
+		runtimeDir:    strings.TrimSpace(runtimeDir),
+		maxLineBytes:  defaultMaxEventLineBytes,
+		openCanonical: os.Open,
 	}
 }
 
@@ -43,7 +45,7 @@ func (r *CanonicalClaimsReader) ReadSession(sessionID string) (SessionClaims, er
 	}
 
 	path := filepath.Join(r.runtimeDir, "sessions", sessionID, "canonical.ndjson")
-	file, err := os.Open(path)
+	file, err := r.openCanonical(path)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return SessionClaims{SessionID: sessionID}, nil
