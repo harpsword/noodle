@@ -101,7 +101,7 @@ func (l *Loop) writePendingReview() error {
 	if err != nil {
 		return err
 	}
-	return filex.WriteFileAtomic(pendingReviewFilePath(l.runtimeDir), append(data, '\n'))
+	return filex.WriteFileAtomicIfChanged(pendingReviewFilePath(l.runtimeDir), append(data, '\n'))
 }
 
 func (l *Loop) loadPendingReview() error {

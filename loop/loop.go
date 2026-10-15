@@ -446,7 +446,8 @@ func enqueueRuntimeCycle(ch chan<- struct{}) {
 
 func shouldTriggerRuntimeCycle(path string) bool {
 	switch filepath.Base(path) {
-	case "orders.json", "orders-next.json", "control.ndjson":
+	// orders.json is a backend projection, not an input to a running loop.
+	case "orders-next.json", "control.ndjson":
 		return true
 	default:
 		return false

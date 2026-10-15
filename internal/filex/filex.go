@@ -1,6 +1,7 @@
 package filex
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -57,4 +58,16 @@ func WriteFileAtomic(path string, data []byte) error {
 		return fmt.Errorf("rename temp file: %w", err)
 	}
 	return nil
+}
+
+// WriteFileAtomicIfChanged preserves an existing file when its bytes already
+// match data. It intentionally leaves metadata unchanged on that path. A read
+// failure falls back to replacement, preserving WriteFileAtomic's behavior for
+// missing or unreadable destinations. Callers must own writes to the path.
+func WriteFileAtomicIfChanged(path string, data []byte) error {
+	existing, err := os.ReadFile(path)
+	if err == nil && bytes.Equal(existing, data) {
+		return nil
+	}
+	return WriteFileAtomic(path, data)
 }

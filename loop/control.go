@@ -368,5 +368,5 @@ func (l *Loop) writeLastAppliedSeq() error {
 		return nil
 	}
 	data := []byte(strconv.FormatUint(l.cmds.lastAppliedSeq, 10) + "\n")
-	return filex.WriteFileAtomic(l.lastAppliedSeqPath(), data)
+	return filex.WriteFileAtomicIfChanged(l.lastAppliedSeqPath(), data)
 }

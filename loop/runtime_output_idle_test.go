@@ -39,6 +39,14 @@ func newOutputTestLoop(t *testing.T, scenario string) *Loop {
 	if scenario == "active" {
 		l.cooks.activeCooksByOrder["42"] = &cookHandle{cookIdentity: cookIdentity{orderID: "42", stageIndex: 0, stage: orders.Orders[0].Stages[0]}, session: &mockSession{id: "sess-42", status: "running", done: make(chan struct{})}}
 	}
+	t.Cleanup(func() {
+		for _, cook := range l.cooks.activeCooksByOrder {
+			if cook.session != nil {
+				_ = cook.session.ForceKill()
+			}
+		}
+		l.Shutdown()
+	})
 	if scenario == "paused" {
 		l.state = StatePaused
 	}

@@ -69,7 +69,8 @@ func Project(s state.State, modeState mode.ModeState) (ProjectionBundle, error) 
 	return bundle, nil
 }
 
-// WriteProjectionFiles atomically writes orders.json and state.json.
+// WriteProjectionFiles atomically replaces orders.json and state.json only
+// when their serialized contents change.
 func WriteProjectionFiles(dir string, bundle ProjectionBundle) error {
 	ordersPath := filepath.Join(dir, ordersFileName)
 	statePath := filepath.Join(dir, stateFileName)
@@ -78,7 +79,7 @@ func WriteProjectionFiles(dir string, bundle ProjectionBundle) error {
 	if err != nil {
 		return fmt.Errorf("encode orders projection: %w", err)
 	}
-	if err := filex.WriteFileAtomic(ordersPath, append(ordersData, '\n')); err != nil {
+	if err := filex.WriteFileAtomicIfChanged(ordersPath, append(ordersData, '\n')); err != nil {
 		return fmt.Errorf("write projected orders file: %w", err)
 	}
 
@@ -89,7 +90,7 @@ func WriteProjectionFiles(dir string, bundle ProjectionBundle) error {
 	if err != nil {
 		return fmt.Errorf("encode state marker projection: %w", err)
 	}
-	if err := filex.WriteFileAtomic(statePath, append(stateData, '\n')); err != nil {
+	if err := filex.WriteFileAtomicIfChanged(statePath, append(stateData, '\n')); err != nil {
 		return fmt.Errorf("write projected state marker file: %w", err)
 	}
 
