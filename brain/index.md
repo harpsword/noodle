@@ -30,6 +30,7 @@
 - [[codebase/claude-print-flag-gotchas]]
 - [[codebase/claude-subprocess-spawn-patterns]]
 - [[codebase/codex-temp-gomodcache-can-break-go-resolution]]
+- [[codebase/empty-control-queue-idle-cpu]]
 - [[codebase/failed-target-auto-repair-for-requeued-orders]]
 - [[codebase/fixture-directories]]
 - [[codebase/loop-test-overlap-matrix]]

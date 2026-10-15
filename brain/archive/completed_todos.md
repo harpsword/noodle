@@ -1,5 +1,7 @@
 # Completed Todos
 
+122. [x] Fix idle CPU caused by empty control queue rewrites — skip truncation under the existing lock when control.ndjson is empty. Regression tests reproduce the filesystem feedback and verify real commands are acknowledged and drained. Isolated CPU comparison: 102.1% to 3.0%; no empty queue rewrites. #bug [[codebase/empty-control-queue-idle-cpu]]
+
 95. [x] ~~Backend should exclusively own `orders.json` — prevent agents from writing to it directly. The loop promotes `orders-next.json` into `orders.json`, and this should be enforced at the backend level (e.g. file permissions, validation gate) rather than relying on skill instructions. [[archive/plans/95-orders-json-ownership/overview]]~~ — subsumed into #115 canonical state convergence rather than executed as a separate plan.
 97. [x] ~~Adapter schema validator: validate adapter output against the expected schema. If invalid, raise a warning that surfaces in the UI and backend logs, and inject the warning into the scheduler prompt so it can create a task to fix the broken adapter. Update adapters docs page with validation behavior. [[archive/plans/97-adapter-schema-validator/overview]]~~ — done.
 113. [x] ~~Deterministic agent completion detection — replace the fragile `terminalStatus()` heuristic with an incremental CompletionTracker state machine, unify process/sprites completion, add configurable stage_yield-aware shutdown, and cleanup verification gate. [[archive/plans/113-deterministic-completion-detection/overview]]~~ — done.
